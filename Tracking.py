@@ -19,4 +19,4 @@ class Tracking:
             position = [sat.name, gpo.position.km[0], gpo.position.km[1],gpo.position.km[2], velocity[0], velocity[1],velocity[2]]
             
             positions.append(position)
-        return json.dumps(positions)
+        return positions
