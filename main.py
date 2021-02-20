@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_restful import Resource, Api
 from Tracking import Tracking
 
@@ -8,7 +8,7 @@ track = Tracking()
 class SatelliteQuery(Resource):
     def get(self):
         result = track.get_pos()
-        return result
+        return jsonify(result)
 
 api.add_resource(SatelliteQuery, '/')
 
