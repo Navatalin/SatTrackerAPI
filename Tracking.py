@@ -8,13 +8,14 @@ import jsons
 import asyncio
 from MQPublisher import MQPublisher
 from MQConsumer import MQConsumer
-from multiprocessing import Process, Queue
+import redis
 
 class Tracking:
     def __init__(self) -> None:
         self.stations_url = 'https://celestrak.com/NORAD/elements/starlink.txt'
         self.satellites = load.tle_file(self.stations_url)
         self.rabbit_mq_url = 'amqp://Worker:workerPassword@localhost:5672/%2F?connection_attempts=3&heartbeat=3600'
+        self.redis_host = redis.Redis(host='localhost',port=6379,db=0)
 
     def satelite_names_list(self):
         sat_names = []
@@ -55,6 +56,7 @@ class Tracking:
     def get_pos(self):
         positions = []
         sat_names = self.satelite_names_list()
+
         #for sat in self.satellites:
          #   ts = load.timescale()
          #   gpo = sat.at(ts.now())
@@ -62,9 +64,11 @@ class Tracking:
          #   position = [sat.name, gpo.position.km[0], gpo.position.km[1],gpo.position.km[2], velocity[0], velocity[1],velocity[2]]
             
          #   positions.append(position)
-        sat_names = self.satelite_names_list()
-        work = list(self.chunks(sat_names, 10))
-        self.send_to_queue(work)
-        positions = self.collect_results(len(sat_names))
+        #work = list(self.chunks(sat_names, 10))
+        #self.send_to_queue(work)
+        #positions = self.collect_results(len(sat_names))
+        for sat in sat_names:
+            position = jsons.loads(self.redis_host.get(sat))
+            positions.append(position)
 
         return positions
